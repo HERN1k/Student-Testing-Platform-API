@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{DC4140C6-E258-4D35-B863-8211F7144FD5}|Solution Items{DC4140C6-E258-4D35-B863-8211F7144FD5}|C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{DC4140C6-E258-4D35-B863-8211F7144FD5}|Solution Items{DC4140C6-E258-4D35-B863-8211F7144FD5}|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{647219AA-63DF-4EA6-8F56-B1C94AFC57FF}|TestingPlatformAPI\\TestingPlatformAPI.csproj|c:\\users\\h1rny\\onedrive\\desktop\\testingplatformapi\\testingplatformapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{647219AA-63DF-4EA6-8F56-B1C94AFC57FF}|TestingPlatformAPI\\TestingPlatformAPI.csproj|solutionrelative:testingplatformapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -23,12 +27,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-11-02T19:27:45.958Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\TestingPlatformAPI\\Program.cs",
               "RelativeDocumentMoniker": "TestingPlatformAPI\\Program.cs",
               "ToolTip": "C:\\Users\\h1rny\\OneDrive\\Desktop\\TestingPlatformAPI\\TestingPlatformAPI\\Program.cs",
               "RelativeToolTip": "TestingPlatformAPI\\Program.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAwwF0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-02T15:47:44.822Z",
               "EditorCaption": ""
@@ -42,10 +59,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             }
           ]
         }
