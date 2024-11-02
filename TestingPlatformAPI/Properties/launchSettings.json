@@ -1,0 +1,60 @@
+{
+    "profiles": {
+        "http": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "POSTGRESQL": "Host=localhost;Port=5432;Database=TestingPlatform;Username=postgres;Password=2356",
+                "REDIS_CONFIGURATION": "localhost:6379",
+                "REDIS_INSTANCE_NAME": "TestingPlatform",
+                "HTTPS_APPLICATION_URL": "https://dreamworkout.pp.ua"
+            },
+            "dotnetRunMessages": true,
+            "applicationUrl": "http://localhost:5249"
+        },
+        "https": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "POSTGRESQL": "Host=localhost;Port=5432;Database=TestingPlatform;Username=postgres;Password=2356",
+                "REDIS_CONFIGURATION": "localhost:6379",
+                "REDIS_INSTANCE_NAME": "TestingPlatform",
+                "HTTPS_APPLICATION_URL": "https://dreamworkout.pp.ua"
+            },
+            "dotnetRunMessages": true,
+            "applicationUrl": "https://localhost:7152;http://localhost:5249"
+        },
+        "IIS Express": {
+            "commandName": "IISExpress",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "POSTGRESQL": "Host=localhost;Port=5432;Database=TestingPlatform;Username=postgres;Password=2356",
+                "REDIS_CONFIGURATION": "localhost:6379",
+                "REDIS_INSTANCE_NAME": "TestingPlatform",
+                "HTTPS_APPLICATION_URL": "https://dreamworkout.pp.ua"
+            }
+        },
+        "Container (Dockerfile)": {
+            "commandName": "Docker",
+            "environmentVariables": {
+                "ASPNETCORE_HTTPS_PORTS": "8081",
+                "ASPNETCORE_HTTP_PORTS": "8080",
+                "POSTGRESQL": "Host=localhost;Port=5432;Database=TestingPlatform;Username=postgres;Password=2356",
+                "REDIS_CONFIGURATION": "localhost:6379",
+                "REDIS_INSTANCE_NAME": "TestingPlatform",
+                "HTTPS_APPLICATION_URL": "https://dreamworkout.pp.ua"
+            },
+            "publishAllPorts": true,
+            "useSSL": true
+        }
+    },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:45026",
+      "sslPort": 44336
+    }
+  }
+}

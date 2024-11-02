@@ -1,0 +1,251 @@
+name: dockercompose3818128656433806845
+services:
+  nginx:
+    container_name: nginx
+    healthcheck:
+      test:
+        - CMD
+        - service
+        - nginx
+        - status
+      timeout: 10s
+      interval: 1m0s
+      retries: 3
+      start_period: 10s
+    image: nginx:alpine
+    networks:
+      stp-network: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: "443"
+        protocol: tcp
+    restart: always
+    user: root
+    volumes:
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\Nginx\conf.d
+        target: /etc/nginx/conf.d
+        bind:
+          create_host_path: true
+  postgres:
+    environment:
+      POSTGRES_DB: TestingPlatform
+      POSTGRES_PASSWORD: "2356"
+      POSTGRES_USER: postgres
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      timeout: 10s
+      interval: 1m0s
+      retries: 3
+      start_period: 10s
+    image: postgres:17
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 10m
+    networks:
+      stp-network: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    restart: always
+    user: root
+    volumes:
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\Postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
+  redis:
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      timeout: 10s
+      interval: 1m0s
+      retries: 3
+      start_period: 10s
+    image: redis:latest
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 10m
+    networks:
+      stp-network: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    restart: always
+    user: root
+    volumes:
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\Redis
+        target: /data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\Redis\redis.conf
+        target: /usr/local/etc/redis/redis.conf
+        bind:
+          create_host_path: true
+  stp:
+    build:
+      context: C:\Users\h1rny\OneDrive\Desktop\TestingPlatformAPI
+      dockerfile: TestingPlatformAPI/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+        LAUNCHING_FROM_VS: "true"
+      labels:
+        com.microsoft.created-by: visual-studio
+        com.microsoft.visual-studio.project-name: TestingPlatformAPI
+      target: base
+    container_name: stp
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      redis:
+        condition: service_started
+        required: true
+    entrypoint:
+      - dotnet
+      - --roll-forward
+      - Major
+      - /VSTools/DistrolessHelper/DistrolessHelper.dll
+      - --wait
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development,
+      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: "true"
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+      HTTPS_APPLICATION_URL: https://dreamworkout.pp.ua
+      NUGET_FALLBACK_PACKAGES: /.nuget/fallbackpackages
+      POSTGRESQL: Host=postgres;Port=5432;Database=TestingPlatform;Username=postgres;Password=2356,
+      REDIS_CONFIGURATION: redis:6379,
+      REDIS_INSTANCE_NAME: TestingPlatform,
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:80/health
+      timeout: 10s
+      interval: 1m0s
+      retries: 3
+      start_period: 10s
+    image: stp:dev
+    labels:
+      com.microsoft.visualstudio.debuggee.arguments: ' --additionalProbingPath /.nuget/packages --additionalProbingPath /.nuget/fallbackpackages  "/app/bin/Debug/net8.0/TestingPlatformAPI.dll"'
+      com.microsoft.visualstudio.debuggee.killprogram: dotnet --roll-forward Major /VSTools/DistrolessHelper/DistrolessHelper.dll --stop dotnet
+      com.microsoft.visualstudio.debuggee.program: dotnet
+      com.microsoft.visualstudio.debuggee.workingdirectory: /app
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 10m
+    networks:
+      stp-network: null
+    ports:
+      - mode: ingress
+        target: 7558
+        published: "7558"
+        protocol: tcp
+    restart: always
+    stop_grace_period: 1m0s
+    tty: true
+    user: root
+    volumes:
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\DataprotectionKeys
+        target: /app/.aspnet/DataProtection-Keys
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\STPAPIDocker\Logs
+        target: /app/logs
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\TestingPlatformAPI\TestingPlatformAPI
+        target: /app
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\OneDrive\Desktop\TestingPlatformAPI
+        target: /src
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\vsdbg\vs2017u5
+        target: /remote_debugger
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\.nuget\packages
+        target: /.nuget/packages
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages
+        target: /.nuget/fallbackpackages
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\AppData\Roaming\ASP.NET\Https
+        target: /root/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\AppData\Roaming\ASP.NET\Https
+        target: /home/app/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\AppData\Roaming\Microsoft\UserSecrets
+        target: /root/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\h1rny\AppData\Roaming\Microsoft\UserSecrets
+        target: /home/app/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\linux-x64\net8.0
+        target: /VSTools
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\HotReload
+        target: /HotReloadAgent
+        read_only: true
+        bind:
+          create_host_path: true
+networks:
+  stp-network:
+    name: dockercompose3818128656433806845_stp-network
+    driver: bridge
