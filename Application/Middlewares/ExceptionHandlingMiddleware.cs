@@ -31,7 +31,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status499ClientClosedRequest;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.OperationCanceled, ExceptionStatus.OperationCanceled.FormattedExceptionStatus()));
 
                 return;
@@ -40,7 +40,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status200OK;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.ForbiddenAccess, ex.Message ?? ExceptionStatus.ForbiddenAccess.FormattedExceptionStatus()));
 
                 return;
@@ -49,7 +49,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.UnauthorizedAccess, ex.Message ?? ExceptionStatus.UnauthorizedAccess.FormattedExceptionStatus()));
 
                 return;
@@ -58,7 +58,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status200OK;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.ArgumentNull, ex.Message ?? ExceptionStatus.ArgumentNull.FormattedExceptionStatus()));
 
                 return;
@@ -67,7 +67,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status200OK;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.Argument, ex.Message ?? ExceptionStatus.Argument.FormattedExceptionStatus()));
 
                 return;
@@ -76,7 +76,7 @@ namespace Application.Middlewares
             {
                 context.Response.StatusCode = StatusCodes.Status200OK;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.Application, ex.Message ?? ExceptionStatus.Application.FormattedExceptionStatus()));
 
                 return;
@@ -87,7 +87,7 @@ namespace Application.Middlewares
 
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-                await context.Response.WriteAsJsonAsync(new ExceptionResult(
+                await context.Response.WriteAsJsonAsync(new Response.Error(
                     ExceptionStatus.Critical, ExceptionStatus.Critical.FormattedExceptionStatus()));
 
                 return;

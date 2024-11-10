@@ -2,15 +2,18 @@ using Application.Middlewares;
 using Application.Services;
 
 using Domain.Interfaces.Application;
+using Domain.Settings;
 
 using Infrastructure.Data.Contexts.ApplicationContext;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 using NLog.Web;
 
@@ -27,8 +30,8 @@ namespace TestingPlatformAPI
             var builder = WebApplication.CreateBuilder(args);
 
             #region Base
-            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Error)
-                .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
+            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", Microsoft.Extensions.Logging.LogLevel.Error)
+                .AddFilter("Microsoft.EntityFrameworkCore", Microsoft.Extensions.Logging.LogLevel.Error);
 
             builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -45,6 +48,15 @@ namespace TestingPlatformAPI
             {
                 options.AddServerHeader = false;
             });
+
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(@"/app/.aspnet/DataProtection-Keys"))
+                .SetApplicationName("TestingPlatformAPI")
+                .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
+                {
+                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+                    ValidationAlgorithm = ValidationAlgorithm.HMACSHA256,
+                });
 
 #if DEBUG
             builder.Services.AddCors(options =>
@@ -77,19 +89,34 @@ namespace TestingPlatformAPI
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-            builder.Services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(@"/app/.aspnet/DataProtection-Keys"))
-                .SetApplicationName("TestingPlatformAPI")
-                .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
-                {
-                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
-                    ValidationAlgorithm = ValidationAlgorithm.HMACSHA256,
-                });
-
             builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
+                options.MultipartBodyLengthLimit = 50 * 1024 * 1024;
             });
+            #endregion
+
+            #region Authentication
+            AzureAd azureAd = builder.Configuration
+                .GetSection(nameof(AzureAd)).Get<AzureAd>() ?? throw new ArgumentNullException(nameof(AzureAd));
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = $"{azureAd.AuthorityInstance}{azureAd.TenantId}/v2.0";
+                    options.Audience = azureAd.Client;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateAudience = true,
+                        ValidAudience = azureAd.Client,
+                        ValidateIssuer = true,
+                        ValidIssuer = $"{azureAd.IssuerInstance}{azureAd.TenantId}/",
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true
+                    };
+#if DEBUG
+                    options.RequireHttpsMetadata = false;
+#endif
+                });
             #endregion
 
             #region Logger
@@ -98,8 +125,8 @@ namespace TestingPlatformAPI
             #endregion
 
             #region Settings
-            //builder.Services.Configure<>(
-            //    builder.Configuration.GetSection(nameof()));
+            builder.Services.Configure<AzureAd>(
+                builder.Configuration.GetSection(nameof(AzureAd)));
             #endregion
 
             #region Postgresql
@@ -144,6 +171,8 @@ namespace TestingPlatformAPI
             builder.Services.AddHostedService<MigrationService>();
 
             builder.Services.AddScoped<ICacheService, CacheService>();
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
             #endregion
 
             WebApplication app = builder.Build();

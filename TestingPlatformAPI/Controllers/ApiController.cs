@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain.DTOs;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TestingPlatformAPI.Controllers
 {
@@ -7,15 +10,31 @@ namespace TestingPlatformAPI.Controllers
     public class ApiController : ControllerBase
     {
         [HttpGet]
-        public IActionResult Get() => Ok(new { Result = "OK" });
+        public IActionResult Get() => Ok(new Response.Success());
 
         [HttpGet("uptime")]
-        public IActionResult Uptime() => Ok(new { Uptime = DateTime.UtcNow - Program.StartupTime });
+        public IActionResult Uptime()
+        {
+            var response = new DTO.TimeResponse(DateTime.UtcNow - Program.StartupTime);
 
+            return Ok(new Response.Time(response));
+        }
+
+        [Authorize]
         [HttpGet("time")]
-        public IActionResult Time() => Ok(new { Time = DateTime.Now });
+        public IActionResult Time(bool utc)
+        {
+            DTO.TimeResponse response;
+            if (utc)
+            {
+                response = new(DateTime.UtcNow);
+            }
+            else
+            {
+                response = new(DateTime.Now);
+            }
 
-        [HttpGet("timeutc")]
-        public IActionResult TimeUtc() => Ok(new { TimeUtc = DateTime.UtcNow });
+            return Ok(new Response.Time(response));
+        }
     }
 }
