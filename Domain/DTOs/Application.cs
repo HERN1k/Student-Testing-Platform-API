@@ -6,13 +6,13 @@ namespace Domain.DTOs
 {
     public sealed class Response
     {
-        public abstract class ResponseBase
+        public abstract class ResponseBase<TObject> where TObject : class
         {
             public string Status { get; init; }
 
             public string? Message { get; init; }
 
-            public object? Data { get; init; }
+            public TObject? Data { get; init; }
 
             private static readonly string _statusCodeOK = StatusCodes.Status200OK.ToString();
             private static readonly string _statusCodeInternalServerError = StatusCodes.Status500InternalServerError.ToString();
@@ -22,7 +22,7 @@ namespace Domain.DTOs
                 Status = _statusCodeOK;
             }
 
-            public ResponseBase(object data)
+            public ResponseBase(TObject data)
             {
                 Status = _statusCodeOK;
                 Data = data ?? default;
@@ -35,11 +35,11 @@ namespace Domain.DTOs
             }
         }
 
-        public sealed class Error(string status, string message) : ResponseBase(status, message) { }
+        public sealed class Error(string status, string message) : ResponseBase<object>(status, message) { }
 
-        public sealed class Success : ResponseBase { }
+        public sealed class Success : ResponseBase<object> { }
 
-        public sealed class Time(DTO.TimeResponse data) : ResponseBase(data) { }
+        public sealed class Time(DTO.TimeResponse data) : ResponseBase<DTO.TimeResponse>(data) { }
     }
 
     public sealed class Request
@@ -86,5 +86,13 @@ namespace Domain.DTOs
                 Time = time.ToString(null, CultureInfo.InvariantCulture);
             }
         }
+
+        public sealed record AddOrUpdateUserInDB(
+                string? Id,
+                string? DisplayName,
+                string? Name,
+                string? Surname,
+                string? Mail
+            );
     }
 }

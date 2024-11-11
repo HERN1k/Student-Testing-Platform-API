@@ -8,57 +8,25 @@ using StackExchange.Redis;
 
 namespace Application.Services
 {
-    public class HealthCheckService : IHostedService
+    public sealed partial class HealthCheckService : IHostedService
     {
         private readonly IDbContextFactory<AppDBContext> _dbContextFactory;
-
         private readonly IConnectionMultiplexer _redis;
-
         private readonly ILogger<HealthCheckService> _logger;
 
-        public HealthCheckService(
-                IDbContextFactory<AppDBContext> dbContextFactory,
-                IConnectionMultiplexer redis,
-                ILogger<HealthCheckService> logger
-            )
+        public HealthCheckService(IDbContextFactory<AppDBContext> dbContextFactory, IConnectionMultiplexer redis, ILogger<HealthCheckService> logger)
         {
-            _dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
-            _redis = redis ?? throw new ArgumentNullException(nameof(redis));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            ValidateConstructorArguments(dbContextFactory, redis, logger);
+            _dbContextFactory = dbContextFactory;
+            _redis = redis;
+            _logger = logger;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        private static void ValidateConstructorArguments(IDbContextFactory<AppDBContext> dbContextFactory, IConnectionMultiplexer redis, ILogger<HealthCheckService> logger)
         {
-            try
-            {
-                using var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-                await context.Database.OpenConnectionAsync(cancellationToken);
-                await context.Database.CloseConnectionAsync();
-                _logger.LogInformation("Database connection successful.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "Database connection failed: {Message}", ex.Message);
-                throw;
-            }
-
-            try
-            {
-                var server = _redis.GetServer(_redis.GetEndPoints()[0]);
-                if (!server.IsConnected)
-                {
-                    throw new InvalidOperationException("Unable to connect to Redis.");
-                }
-                await _redis.GetDatabase().PingAsync();
-                _logger.LogInformation("Redis connection successful.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "Redis connection failed: {Message}", ex.Message);
-                throw;
-            }
+            ArgumentNullException.ThrowIfNull(dbContextFactory, nameof(dbContextFactory));
+            ArgumentNullException.ThrowIfNull(redis, nameof(redis));
+            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
         }
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }

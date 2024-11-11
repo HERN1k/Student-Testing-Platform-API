@@ -17,9 +17,9 @@ namespace TestingPlatformAPI.Controllers
         }
 
         [HttpPost("authentication")]
-        public async Task<IActionResult> Authentication(Request.Authentication request)
+        public async Task<IActionResult> Authentication(Request.Authentication request, CancellationToken token)
         {
-            await _authentication.Authentication(request);
+            await _authentication.Authentication(request, token);
 
             return Ok(new Response.Success());
         }

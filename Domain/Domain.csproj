@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\Domain\" />
-    <Folder Include="Interfaces\Infrastructure\" />
   </ItemGroup>
 
 </Project>

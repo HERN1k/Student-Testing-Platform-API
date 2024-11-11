@@ -2,9 +2,11 @@ using Application.Middlewares;
 using Application.Services;
 
 using Domain.Interfaces.Application;
+using Domain.Interfaces.Infrastructure;
 using Domain.Settings;
 
 using Infrastructure.Data.Contexts.ApplicationContext;
+using Infrastructure.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -173,6 +175,9 @@ namespace TestingPlatformAPI
             builder.Services.AddScoped<ICacheService, CacheService>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+
+            builder.Services.AddScoped(typeof(IRepositoryUtilities<>), typeof(RepositoryUtilities<>));
+            builder.Services.AddScoped<IUsersRepository, UsersRepository>();
             #endregion
 
             WebApplication app = builder.Build();

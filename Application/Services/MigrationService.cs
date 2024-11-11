@@ -6,42 +6,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
-    public class MigrationService : IHostedService
+    public sealed partial class MigrationService : IHostedService
     {
         private readonly IDbContextFactory<AppDBContext> _contextFactory;
-
         private readonly ILogger<MigrationService> _logger;
 
-        public MigrationService(
-                IDbContextFactory<AppDBContext> contextFactory,
-                ILogger<MigrationService> logger
-            )
+        public MigrationService(IDbContextFactory<AppDBContext> contextFactory, ILogger<MigrationService> logger)
         {
-            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            ValidateConstructorArguments(contextFactory, logger);
+            _contextFactory = contextFactory;
+            _logger = logger;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        private static void ValidateConstructorArguments(IDbContextFactory<AppDBContext> contextFactory, ILogger<MigrationService> logger)
         {
-            _logger.LogInformation("Starting database migration...");
-
-            try
-            {
-                bool isInit = await MigrateAsync(cancellationToken);
-                if (isInit)
-                {
-                    await InitializeDataAsync(cancellationToken);
-                }
-                _logger.LogInformation("Database migration and initialization completed successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "An error occurred during database migration: {Message}", ex.Message);
-                throw;
-            }
+            ArgumentNullException.ThrowIfNull(contextFactory, nameof(contextFactory));
+            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
         }
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         private async Task<bool> MigrateAsync(CancellationToken cancellationToken)
         {
@@ -52,7 +33,6 @@ namespace Application.Services
             return !isInit;
         }
 
-        private async Task InitializeDataAsync(CancellationToken cancellationToken)
-        { }
+        private Task InitializeDataAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
