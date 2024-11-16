@@ -7,11 +7,12 @@ namespace TestingPlatformAPI.Controllers
 {
     [ApiController]
     [Route("api")]
-    public class ApiController : ControllerBase
+    public sealed class ApiController : ControllerBase
     {
         [HttpGet]
         public IActionResult Get() => Ok(new Response.Success());
 
+        [Authorize]
         [HttpGet("uptime")]
         public IActionResult Uptime()
         {
@@ -20,7 +21,7 @@ namespace TestingPlatformAPI.Controllers
             return Ok(new Response.Time(response));
         }
 
-        [Authorize]
+        [Authorize(Policy = "Teacher")]
         [HttpGet("time")]
         public IActionResult Time(bool utc)
         {

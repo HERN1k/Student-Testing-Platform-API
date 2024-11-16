@@ -7,15 +7,12 @@ namespace Domain.Entities
     {
         public sealed class User : EntityBase, IEquatable<User>
         {
-            [Required]
             [Column("Display_Name")]
             public string? DisplayName { get; set; }
 
-            [Required]
             [Column("Name")]
             public string? Name { get; set; }
 
-            [Required]
             [Column("Surname")]
             public string? Surname { get; set; }
 
@@ -25,7 +22,7 @@ namespace Domain.Entities
 
             [Required]
             [Column("Is_Student")]
-            public bool IsStudent { get; set; } = true;
+            public bool IsStudent { get; set; }
 
             [Required]
             [Column("Created_Utc")]

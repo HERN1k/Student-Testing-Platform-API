@@ -5,6 +5,9 @@ using Domain.Interfaces.Application;
 using Domain.Interfaces.Infrastructure;
 using Domain.Settings;
 
+using Helpers.Extensions;
+using Helpers.Utilities;
+
 using Infrastructure.Data.Contexts.ApplicationContext;
 using Infrastructure.Repositories;
 
@@ -101,24 +104,32 @@ namespace TestingPlatformAPI
             AzureAd azureAd = builder.Configuration
                 .GetSection(nameof(AzureAd)).Get<AzureAd>() ?? throw new ArgumentNullException(nameof(AzureAd));
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.Authority = string.Concat(azureAd.AuthorityInstance, azureAd.TenantId, "/v2.0");
+                options.Audience = azureAd.Client;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.Authority = $"{azureAd.AuthorityInstance}{azureAd.TenantId}/v2.0";
-                    options.Audience = azureAd.Client;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = true,
-                        ValidAudience = azureAd.Client,
-                        ValidateIssuer = true,
-                        ValidIssuer = $"{azureAd.IssuerInstance}{azureAd.TenantId}/",
-                        ValidateIssuerSigningKey = true,
-                        ValidateLifetime = true
-                    };
+                    ValidateAudience = true,
+                    ValidAudience = azureAd.Client,
+                    ValidateIssuer = true,
+                    ValidIssuer = string.Concat(azureAd.IssuerInstance, azureAd.TenantId, "/"),
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true
+                };
 #if DEBUG
-                    options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = false;
 #endif
+            });
+
+            builder.Services.AddAuthorizationBuilder().AddPolicy("Teacher", policy =>
+            {
+                policy.RequireAssertion(context =>
+                {
+                    var claim = context.User.FindFirst(c => c.Type == JWTClaims.Mail);
+                    return claim != null && !claim.Value.IsStudent();
                 });
+            });
             #endregion
 
             #region Logger
@@ -176,7 +187,7 @@ namespace TestingPlatformAPI
 
             builder.Services.AddScoped<IAuthService, AuthService>();
 
-            builder.Services.AddScoped(typeof(IRepositoryUtilities<>), typeof(RepositoryUtilities<>));
+            builder.Services.AddScoped(typeof(IRepositoryUtilities<,>), typeof(RepositoryUtilities<,>));
             builder.Services.AddScoped<IUsersRepository, UsersRepository>();
             #endregion
 
@@ -198,20 +209,19 @@ namespace TestingPlatformAPI
                 Secure = CookieSecurePolicy.Always
             });
 
-            app.UseRouting();
-
             app.UseXContentTypeOptions();
-            app.UseReferrerPolicy(opts => opts.NoReferrer());
+            app.UseReferrerPolicy(options => options.NoReferrer());
             app.UseXXssProtection(options => options.EnabledWithBlockMode());
             app.UseXfo(options => options.Deny());
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
+            app.UseRouting();
             app.MapControllers();
             app.MapHealthChecks("/health");
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
             #endregion
 
             app.Run();

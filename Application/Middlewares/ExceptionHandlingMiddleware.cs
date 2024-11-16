@@ -36,6 +36,15 @@ namespace Application.Middlewares
 
                 return;
             }
+            catch (InvalidOperationException ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status200OK;
+
+                await context.Response.WriteAsJsonAsync(new Response.Error(
+                    ExceptionStatus.InvalidOperation, ex.Message ?? ExceptionStatus.InvalidOperation.FormattedExceptionStatus()));
+
+                return;
+            }
             catch (ForbiddenAccessException ex)
             {
                 context.Response.StatusCode = StatusCodes.Status200OK;

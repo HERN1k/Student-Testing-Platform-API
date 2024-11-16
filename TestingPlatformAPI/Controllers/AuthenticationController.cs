@@ -7,7 +7,7 @@ namespace TestingPlatformAPI.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthenticationController : ControllerBase
+    public sealed class AuthenticationController : ControllerBase
     {
         private readonly IAuthService _authentication;
 
@@ -19,7 +19,7 @@ namespace TestingPlatformAPI.Controllers
         [HttpPost("authentication")]
         public async Task<IActionResult> Authentication(Request.Authentication request, CancellationToken token)
         {
-            await _authentication.Authentication(request, token);
+            await _authentication.Authentication(request, HttpContext.User.Claims, token);
 
             return Ok(new Response.Success());
         }

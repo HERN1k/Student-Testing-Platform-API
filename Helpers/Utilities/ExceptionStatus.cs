@@ -6,6 +6,8 @@
 
         public const string OperationCanceled = "OPERATION_CANCELED_ERROR";
 
+        public const string InvalidOperation = "INVALID_OPERATION_ERROR";
+
         public const string UnauthorizedAccess = "UNAUTHORIZED_ACCESS_ERROR";
 
         public const string ForbiddenAccess = "FORBIDDEN_ACCESS_ERROR";

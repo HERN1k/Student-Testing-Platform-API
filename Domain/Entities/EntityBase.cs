@@ -22,7 +22,7 @@ namespace Domain.Entities
                 {
                     if (value == Guid.Empty)
                     {
-                        throw new ArgumentNullException(nameof(value), "Value is \"Guid.Empty\"");
+                        throw new ArgumentNullException(nameof(value), "Value is 'Guid.Empty'");
                     }
 
                     _id = value;

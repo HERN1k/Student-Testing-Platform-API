@@ -34,10 +34,6 @@ namespace Application.Services
             ArgumentNullException.ThrowIfNull(logger, nameof(logger));
         }
 
-        private IServer GetRedisServer()
-        {
-            var endpoint = _redis.GetEndPoints()[0];
-            return _redis.GetServer(endpoint);
-        }
+        private IServer GetRedisServer() => _redis.GetServer(_redis.GetEndPoints()[0]);
     }
 }

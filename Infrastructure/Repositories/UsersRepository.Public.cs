@@ -1,5 +1,6 @@
 ﻿using Domain.DTOs;
 
+using Helpers.Extensions;
 using Helpers.Utilities;
 
 using Microsoft.EntityFrameworkCore;
@@ -39,53 +40,31 @@ namespace Infrastructure.Repositories
             return cachedUser;
         }
 
-        public async Task AddOrUpdateUserAsync(DTO.AddOrUpdateUserInDB dto, CancellationToken token)
+        public async Task<User> AddOrUpdateUserAsync(DTO.AddOrUpdateUserInDB dto, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
+            ArgumentException.ThrowIfNullOrEmpty(dto.Id, nameof(dto.Id));
+            ArgumentException.ThrowIfNullOrEmpty(dto.Mail, nameof(dto.Mail));
+
             token.ThrowIfCancellationRequested();
 
-            await _utilities.TryWrapper(async (contextFactory, cache, data, ct) =>
+            return await _utilities.TryWrapper(async (contextFactory, cache, data, ct) =>
             {
-                ArgumentNullException.ThrowIfNull(data, nameof(data));
-                ArgumentException.ThrowIfNullOrEmpty(data.Id, nameof(data.Id));
-                ArgumentException.ThrowIfNullOrEmpty(data.Mail, nameof(data.Mail));
+                if (!Guid.TryParse(data.Id, out Guid id) || id == Guid.Empty)
+                {
+                    throw new ArgumentException("The unique user ID is not valid");
+                }
 
-                bool isParseSuccessful = Guid.TryParse(data.Id, out Guid id);
-                string cacheKey = string.Concat(CacheKeys.EntityUserId, id.ToString());
+                string cacheKey = string.Concat(CacheKeys.EntityUserId, data.Id);
 
                 await using var context = await contextFactory.CreateDbContextAsync(ct);
 
-                bool isUserExist;
-                if (isParseSuccessful)
-                {
-                    isUserExist = await context.Users
-                        .AsNoTracking()
-                        .Where(user => user.Id == id)
-                        .AnyAsync(ct);
-                }
-                else
-                {
-                    isUserExist = await context.Users
-                        .AsNoTracking()
-                        .Where(user => user.Mail == data.Mail)
-                        .AnyAsync(ct);
-                }
+                User? user = await context.Users
+                    .Where(user => user.Id == id)
+                    .SingleOrDefaultAsync(ct);
 
-                if (isUserExist)
+                if (user != null)
                 {
-                    User user;
-                    if (isParseSuccessful)
-                    {
-                        user = await context.Users
-                            .Where(user => user.Id == id)
-                            .SingleOrDefaultAsync(ct) ?? throw new InvalidOperationException("");
-                    }
-                    else
-                    {
-                        user = await context.Users
-                            .Where(user => user.Mail == data.Mail)
-                            .SingleOrDefaultAsync(ct) ?? throw new InvalidOperationException("");
-                    }
-
                     user.DisplayName = data.DisplayName;
                     user.Name = data.Name;
                     user.Surname = data.Surname;
@@ -96,9 +75,24 @@ namespace Infrastructure.Repositories
                 }
                 else
                 {
-                    // TODO
+                    user = new()
+                    {
+                        Id = id,
+                        DisplayName = data.DisplayName ?? string.Empty,
+                        Name = data.Name,
+                        Surname = data.Surname,
+                        Mail = data.Mail,
+                        IsStudent = data.Mail.IsStudent()
+                    };
+
+                    context.Users.Add(user);
+                    await context.SaveChangesAsync(ct);
+
+                    await cache.SetCacheAsync(cacheKey, user);
                 }
-            }, dto, token);
+
+                return user;
+            }, dto, token) ?? throw new InvalidOperationException();
         }
     }
 }

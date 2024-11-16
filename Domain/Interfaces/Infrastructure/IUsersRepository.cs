@@ -8,6 +8,6 @@ namespace Domain.Interfaces.Infrastructure
     {
         Task<Entity.User?> GetUserFromIdAsync(Guid id, CancellationToken token);
 
-        Task AddOrUpdateUserAsync(DTO.AddOrUpdateUserInDB dto, CancellationToken token);
+        Task<Entity.User> AddOrUpdateUserAsync(DTO.AddOrUpdateUserInDB dto, CancellationToken token);
     }
 }

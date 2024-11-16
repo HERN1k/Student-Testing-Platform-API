@@ -27,7 +27,10 @@ namespace Application.Services
                 {
                     throw new InvalidOperationException("Unable to connect to Redis.");
                 }
-                await _redis.GetDatabase().PingAsync();
+                await server.PingAsync();
+#if DEBUG
+                await server.FlushDatabaseAsync();
+#endif
                 _logger.LogInformation("Redis connection successful.");
             }
             catch (Exception ex)
